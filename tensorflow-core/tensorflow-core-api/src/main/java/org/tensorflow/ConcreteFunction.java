@@ -268,6 +268,11 @@ public class ConcreteFunction implements AutoCloseable {
     }
   }
 
+  @Override
+  public String toString() {
+    return signature.toString();
+  }
+
   private enum Ownership {
     GRAPH_AND_SESSION, SESSION_ONLY, NONE;
   }

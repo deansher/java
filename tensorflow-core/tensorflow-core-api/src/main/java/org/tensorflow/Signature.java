@@ -15,6 +15,7 @@
  */
 package org.tensorflow;
 
+import java.util.Map;
 import java.util.Set;
 import org.tensorflow.ndarray.Shape;
 import org.tensorflow.proto.framework.DataType;
@@ -145,6 +146,28 @@ public class Signature  {
     return signatureDef.getOutputsMap().keySet();
   }
 
+  @Override
+  public String toString() {
+    StringBuilder strBuilder = new StringBuilder("Signature for \"" + key +"\":\n");
+    if (!methodName().isEmpty()) {
+      strBuilder.append("\tMethod: \"").append(methodName()).append("\"\n");
+    }
+    if (signatureDef.getInputsCount() > 0) {
+      strBuilder.append("\tInputs:\n");
+      printTensorInfo(signatureDef.getInputsMap(), strBuilder);
+    }
+    if (signatureDef.getOutputsCount() > 0) {
+      strBuilder.append("\tOutputs:\n");
+      printTensorInfo(signatureDef.getOutputsMap(), strBuilder);
+    }
+    return strBuilder.toString();
+  }
+
+  Signature(String key, SignatureDef signatureDef) {
+    this.key = key;
+    this.signatureDef = signatureDef;
+  }
+
   SignatureDef asSignatureDef() {
     return signatureDef;
   }
@@ -152,8 +175,20 @@ public class Signature  {
   private final String key;
   private final SignatureDef signatureDef;
 
-  Signature(String key, SignatureDef signatureDef) {
-    this.key = key;
-    this.signatureDef = signatureDef;
+  private static void printTensorInfo(Map<String, TensorInfo> tensorMap, StringBuilder strBuilder) {
+    tensorMap.forEach((key, tensorInfo) -> {
+      strBuilder.append("\t\t\"")
+          .append(key)
+          .append("\": dtype=")
+          .append(tensorInfo.getDtype().name())
+          .append(", shape=(");
+      for (int i = 0; i < tensorInfo.getTensorShape().getDimCount(); ++i) {
+        strBuilder.append(tensorInfo.getTensorShape().getDim(i).getSize());
+        if (i < tensorInfo.getTensorShape().getDimCount() - 1) {
+          strBuilder.append(", ");
+        }
+      }
+      strBuilder.append(")\n");
+    });
   }
 }
